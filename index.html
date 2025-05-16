@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kuis Pintar Acak</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f8ff;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 10px;
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 { margin: 10px 0; }
+    #question { font-size: 18px; margin: 20px 0; }
+    #options button {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 16px;
+      background: #e0e0ff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #options button:hover {
+      background: #aaddff;
+    }
+    #timer, #score {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #result img {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+    #start-btn {
+      padding: 12px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+    #start-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Kuis Cerdas Acak</h2>
+    <div id="start-screen">
+      <p>Jawab 20 soal acak dan raih skor maksimal 100!</p>
+      <button id="start-btn">Mulai Kuis</button>
+    </div>
+    
+    <div id="quiz" style="display:none;">
+      <div id="question-number"></div>
+      <div id="question"></div>
+      <div id="options"></div>
+      <div id="timer">Waktu: 60 detik</div>
+      <div id="score">Skor: 0</div>
+    </div>
+
+    <div id="result" style="display:none;"></div>
+  </div>
+
+  <script>
+    const bankSoal = [
+      { q: "Siapa pemain sepak bola yang mencetak gol pada 1 Agustus 2023 untuk Arema?", options: ["Dedik Setiawan", "Cristiano Ronaldo", "Messi", "Feby Eka"], answer: "Dedik Setiawan" },
+      { q: "Berapa hasil dari 12 x 3?", options: ["36", "24", "18", "48"], answer: "36" },
+      { q: "Sebutkan lambang sila ke-2 Pancasila?", options: ["Rantai", "Bintang", "Pohon", "Kepala Banteng"], answer: "Rantai" },
+      { q: "Apa agama mayoritas di Indonesia?", options: ["Islam", "Kristen", "Budha", "Hindu"], answer: "Islam" },
+      { q: "Kepanjangan dari PLH adalah?", options: ["Pendidikan Lingkungan Hidup", "Perlindungan Listrik Harian", "Pintu Listrik Harus", "Papan Listrik Harian"], answer: "Pendidikan Lingkungan Hidup" },
+      { q: "Ibukota Provinsi Kalimantan Timur?", options: ["Samarinda", "Pontianak", "Balikpapan", "Banjarmasin"], answer: "Samarinda" },
+      { q: "Siapa penemu bola lampu?", options: ["Thomas Edison", "Einstein", "Tesla", "Newton"], answer: "Thomas Edison" },
+      { q: "Salah satu rukun Islam?", options: ["Shalat", "Main Bola", "Makan", "Tidur"], answer: "Shalat" },
+      { q: "Bentuk dari bola adalah?", options: ["Bulat", "Segitiga", "Kotak", "Persegi"], answer: "Bulat" },
+      { q: "Bahasa Inggris dari 'air' adalah?", options: ["Water", "Wind", "Wet", "Rain"], answer: "Water" },
+      { q: "Nama gunung tertinggi di Indonesia?", options: ["Jayawijaya", "Semeru", "Rinjani", "Merapi"], answer: "Jayawijaya" },
+      { q: "Berapa hasil dari 25 ÷ 5?", options: ["5", "4", "3", "6"], answer: "5" },
+      { q: "Apa nama lambang negara Indonesia?", options: ["Garuda Pancasila", "Macan Garang", "Elang Perkasa", "Rajawali Merdeka"], answer: "Garuda Pancasila" },
+      { q: "Negara tetangga Indonesia di selatan?", options: ["Australia", "Singapura", "Malaysia", "Timor Leste"], answer: "Australia" },
+      { q: "Hewan yang bisa hidup di air dan darat?", options: ["Katak", "Kucing", "Ikan", "Burung"], answer: "Katak" },
+      { q: "Benda langit yang memberi cahaya siang hari?", options: ["Matahari", "Bulan", "Bintang", "Mars"], answer: "Matahari" },
+      { q: "Siapa presiden Indonesia ke-7?", options: ["Jokowi", "Soeharto", "Sukarno", "Habibie"], answer: "Jokowi" },
+      { q: "Organ yang memompa darah?", options: ["Jantung", "Paru-paru", "Hati", "Otak"], answer: "Jantung" },
+      { q: "Ibukota Provinsi Aceh?", options: ["Banda Aceh", "Medan", "Padang", "Lhokseumawe"], answer: "Banda Aceh" },
+      { q: "Warna campuran biru + kuning?", options: ["Hijau", "Ungu", "Merah", "Coklat"], answer: "Hijau" },
+      { q: "Bahasa Inggris dari 'kucing'?", options: ["Cat", "Dog", "Mouse", "Tiger"], answer: "Cat" },
+      { q: "Mata uang Indonesia?", options: ["Rupiah", "Dollar", "Yen", "Euro"], answer: "Rupiah" },
+      { q: "Simbol kimia untuk air?", options: ["H2O", "CO2", "NaCl", "O2"], answer: "H2O" },
+      { q: "Planet ketiga dari Matahari?", options: ["Bumi", "Mars", "Venus", "Saturnus"], answer: "Bumi" },
+      { q: "Satuan dari arus listrik?", options: ["Ampere", "Watt", "Volt", "Ohm"], answer: "Ampere" }
+    ];
+
+    let soal = [];
+    let current = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 60;
+
+    const startBtn = document.getElementById("start-btn");
+    const startScreen = document.getElementById("start-screen");
+    const quiz = document.getElementById("quiz");
+    const question = document.getElementById("question");
+    const options = document.getElementById("options");
+    const result = document.getElementById("result");
+    const scoreEl = document.getElementById("score");
+    const timerEl = document.getElementById("timer");
+    const qNumber = document.getElementById("question-number");
+
+    startBtn.addEventListener("click", startGame);
+
+    function startGame() {
+      soal = shuffle([...bankSoal]).slice(0, 20);
+      current = 0;
+      score = 0;
+      startScreen.style.display = "none";
+      result.style.display = "none";
+      quiz.style.display = "block";
+      showQuestion();
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function startTimer() {
+      clearInterval(timer);
+      timeLeft = 60;
+      timerEl.textContent = `Waktu: ${timeLeft} detik`;
+      timer = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Waktu: ${timeLeft} detik`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          score -= 5;
+          nextQuestion();
+        }
+      }, 1000);
+    }
+
+    function showQuestion() {
+      if (current >= soal.length) return endGame();
+      const q = soal[current];
+      qNumber.textContent = `Soal ${current + 1} dari 20`;
+      question.textContent = q.q;
+      options.innerHTML = "";
+      q.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.onclick = () => {
+          clearInterval(timer);
+          if (opt === q.answer) score += 5;
+          else score -= 5;
+          nextQuestion();
+        };
+        options.appendChild(btn);
+      });
+      scoreEl.textContent = `Skor: ${score}`;
+      startTimer();
+    }
+
+    function nextQuestion() {
+      current++;
+      showQuestion();
+    }
+
+    function endGame() {
+      quiz.style.display = "none";
+      result.style.display = "block";
+      let msg = `<h2>Skor Kamu: ${score}</h2>`;
+      if (score >= 100) {
+        msg += `<p>Kamu luar biasa! 🎉</p><img src="https://i.supa.codes/wgW6qw">`;
+      } else if (score < 50) {
+        msg += `<p>Yah, coba lagi yuk! 😱</p><img src="https://i.supa.codes/a3cKqn">`;
+      } else {
+        msg += `<p>Bagus, tapi masih bisa lebih baik!</p>`;
+      }
+      msg += `<br><button onclick="startGame()">Main Lagi</button>`;
+      result.innerHTML = msg;
+    }
+  </script>
+</body>
+</html>
